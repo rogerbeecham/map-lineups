@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone="no"?>
+<?xml-stylesheet href="../css/svg.css" type="text/css"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox='0 0 400 400'>
+    <path d="M 43.4706 203.667 L 58.2687 218.465 124.86 218.465 139.659 203.667 124.86 188.869 58.2687 188.869 Z" class="strokeBlack strokeMedium fillLightBlue"/>
+    <path d="M 43.4706 100.08 L 58.2687 114.879 124.86 114.879 139.659 100.08 124.86 85.2822 58.2687 85.2822 Z" class="strokeBlack strokeMedium fillLightBlue"/>
+    <path d="M 43.4703 307.253 L 58.2685 322.051 124.86 322.051 139.658 307.253 124.86 292.455 58.2685 292.455 Z" class="strokeBlack strokeMedium fillLightBlue"/>
+    <path d="M 143.358 207.366 L 128.56 222.164 128.56 288.756 143.358 303.554 158.156 288.756 158.156 222.164 Z" class="strokeBlack strokeMedium fillLightBlue"/>
+    <path d="M 143.358 103.779 L 128.56 118.577 128.56 185.169 143.358 199.967 158.156 185.169 158.156 118.577 Z" class="strokeBlack strokeMedium fillLightBlue"/>
+    
+    <path d="M 238.388 203.666 L 253.186 218.464 319.778 218.464 334.576 203.666 319.778 188.868 253.186 188.868 Z" class="strokeBlack strokeMedium fillLightBlue"/>
+    <path d="M 234.688 103.779 L 219.89 118.577 219.89 185.169 234.688 199.967 249.487 185.169 249.487 118.577 Z" class="strokeBlack strokeMedium fillLightBlue"/>
+    <path d="M 238.388 307.253 L 253.186 322.051 319.778 322.051 334.576 307.253 319.778 292.455 253.186 292.455 Z" class="strokeBlack strokeMedium fillLightBlue"/>
+    <path d="M 338.275 207.366 L 323.477 222.164 323.477 288.756 338.275 303.554 353.073 288.756 353.073 222.164 Z" class="strokeBlack strokeMedium fillLightBlue"/>
+    <path d="M 238.388 100.079 L 253.186 114.877 319.778 114.877 334.576 100.079 319.778 85.2812 253.186 85.2812 Z" class="strokeBlack strokeMedium fillLightBlue"/>    
+</svg>

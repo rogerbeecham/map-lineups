@@ -1,0 +1,90 @@
+/* 
+ STROKE COLORS
+*/
+
+.strokeBlue {
+    stroke: blue;
+}
+
+.strokeLightBlue {
+    stroke: #8da0cb;
+}
+
+.strokeLightRed {
+    stroke: #fc8d62;
+}
+
+.strokeRed {
+    stroke: red;
+}
+
+.strokeGreen {
+    stroke: green;
+}
+
+.strokeNone {
+    stroke: none;
+}
+
+.strokeWhite {
+    stroke: white;
+}
+
+.strokeBlack {
+    stroke: black;
+}
+
+/* 
+ STROKE WIDTHS
+*/
+
+.stokeThin {
+    stroke-width: 1;
+    stroke-linecap:round;stroke-linejoin:round;
+}
+
+.strokeMedium {
+    stroke-width: 2;
+    stroke-linecap:round;stroke-linejoin:round;
+}
+
+.strokeHeavy {
+    stroke-width: 4.5;
+    stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* 
+ FILL COLORS
+*/
+
+.fillBlue {
+    fill: blue;
+}
+
+.fillLightBlue {
+    fill: #8da0cb;;
+}
+
+.fillLightRed {
+    fill: #fc8d62;
+}
+
+.fillRed {
+    fill: red;
+}
+
+.fillGreen {
+    fill: green;
+}
+
+.fillNone {
+    fill: none;
+}
+
+.fillWhite {
+    fill: white;
+}
+
+.fillBlack {
+    fill: black;
+}
