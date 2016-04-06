@@ -14,7 +14,7 @@ This document contains supplementary information for our paper: _Map line-ups: u
 
 # Experiment
 
-Below is some code and discussion of how we generate the stimulus used in the eperiment. Code for the experiment itself can be found in the "experiment" folder and instructions are in the README of that folder.  
+Below is some code and discussion of how we generate the stimulus used in the experiment. Code for the experiment itself can be found [experiment/](experiment). Instructions for trying this locally are at the end of this section.  
 
 All stimuli used in the test were created using R.  
 
@@ -238,9 +238,13 @@ print(map5, vp=viewport(layout.pos.col = 5))
 ```
 ![plot of chunk generating_geographies](figures/autocorrelated_maps.png)
 
+R scripts for generating maps in the directory structure used by our survey software can be found in [src/](src/): ```generate_tests.R```.
+
 ## Trying the survey
 
-[under development]
+You will need to install [_MySQL_](https://dev.mysql.com/usingmysql/get_started.html) and  [_MAMP_](https://www.mamp.info/en/) -- the latter of which  enables _PHP_ and _MySQL_ to be run locally. After installing _MAMP_, select ```preferences```, ```web server``` and navigate to ```../experiment/```. After ```start servers```, open a browser and enter ```localhost:8888/admin_initialize.php```. As well as creating the _MySQL_ dbase (called _maplineups_) and tables, this reads the pushed sample maps stored as .png files in [tests/](experiment/tests/) and creates a ```../stimuli/``` folder, which is used by the dbase and survey software. To reduce the size of this repository, grid maps only are pushed. Open a _MySQL_ dbase connection via ```root``` and use the recently created  maplineups dbase. This should contain five tables: _lineup_, _lineupanswer_, _map_, _participantgroup_, _user_.  
+
+To try the survey enter ```localhost:8888``` into a browser.
 
 ## Analysis
 
