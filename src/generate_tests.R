@@ -1,17 +1,17 @@
 # -------- required packages ------------
 
-#geog packages
+# Geog packages
 library(rgdal) 
 library(rgeos) 
 library(spdep)
 library(gtools)
 library(spatstat) 
 library(FNN)
-#plotting packages
+# Plotting packages
 library(tmap)
 library(ggplot2)
 library(gridExtra)
-#data munging packages
+# Data munging packages
 library(magrittr) 
 library(dplyr)
 
@@ -21,19 +21,19 @@ england_OAs <- readOGR(dsn = "shapefiles", layer = "england_oa_2011")
 england_OAs@data$row <- 1:nrow(england_OAs@data)
 proj4string(england_OAs) <- CRS("+init=epsg:27700")
 spTransform(england_OAs, CRS("+init=epsg:27700 +units=km"))
-#middle super output areas (for grouping output areas)
+# msoas (for grouping output areas)
 england_msoas <- readOGR(dsn = "shapefiles", layer = "msoa_boundaries")
 england_msoas@data$row <- 1:nrow(england_msoas@data)
 proj4string(england_msoas) <- CRS("+init=epsg:27700")
 spTransform(england_msoas, CRS("+init=epsg:27700 +units=km"))
 colnames(england_msoas@data) <- c("msoa","msoaNm","msoaNm2","row")
-#oa to msoa lookup
+# oa to msoa lookup
 msoas <- read.csv("shapefiles/oa_msoa.csv", header = TRUE)
 msoas <- msoas[,1:4]
 msoas$LSOA11CD<- NULL
 msoas$LSOA11NM<- NULL
 colnames(msoas) <- c("oa","msoa")
-#filter msoas based on msoas for which we have geometries
+# Filter msoas based on msoas for which we have geometries
 msoas <-  msoas[which( england_OAs@data$CODE %in% msoas$oa ),]
 candidate_msoas <- msoas %>% select(msoa) %>% distinct(msoa)
 colnames(candidate_msoas) <- c("msoa")
@@ -41,7 +41,7 @@ colnames(candidate_msoas) <- c("msoa")
 
 # -------- required functions ------------
 
-#function for finding a region of a given irregularity (as measured by coefficient of variaiton in area)
+# Function for finding a region of a given irregularity (as measured by coefficient of variaiton in area)
 find.geography <- function(england_msoas, msoas, england_OAs, coefVarMin, coefVarMax) 
 {
   repeat
@@ -66,7 +66,7 @@ find.geography <- function(england_msoas, msoas, england_OAs, coefVarMin, coefVa
   }
 }
 
-# function for appending attribute data
+# Function for appending attribute data
 create.attribute.data <- function(data)
 {
   data@data$value<- NULL
@@ -224,49 +224,49 @@ generate.map <- function(data, min, max, path1Text, path1Map, path2Text, path2Ma
   
   repeat
   {
-    #start with a new permutation
+    # Start with a new permutation
     permutation<- data@data[sample(nrow(data@data)),]
     iNow <- moran.test(permutation$value, data.lw)$estimate[1]
     iOld<- iNow
     dOld<-NULL
     dOld=sqrt((iNow-max)^2)
     
-    #if after 5000 attempts, still not reached desired Moran's I, then try a new permutation.
+    # If after 5000 attempts still not reached desired Moran's I, then try a new permutation.
     for(j in 1:5000)
     {
-      #break if reached desired I.
+      # Break if reached desired I.
       if(iNow >=min && iNow < max)
       {
         break
       }  
       
-      #sample two distinct positions  
+      # Sample two distinct positions  
       swapIndex <- sample(1:nrow(permutation),2, replace=FALSE)
-      #get values corresponding to these positions
+      # Get values corresponding to these positions
       swapValues <- sapply(swapIndex,function(rowIndex){return(permutation$value[rowIndex])})
       
-      #swap the values 
+      # Swap the values 
       permutation$value[swapIndex[1]]<-swapValues[2]
       permutation$value[swapIndex[2]]<-swapValues[1]
       
-      #calculate new Moran's I  
+      # Calculate new Moran's I  
       iNow <- moran.test(permutation$value, data.lw)$estimate[1]
       dNow=sqrt((iNow-max)^2)
       
-      #revert back if it's not reduced distance to targets 
+      # Revert back if not reduced distance to targets 
       if(dNow<dOld)
       {
         iOld <- iNow
         dOld <- dNow
       }
-      else #revert if no nearer target
+      else 
       {  
         iNow<-iOld
         permutation$value[swapIndex[1]]<-swapValues[1]
         permutation$value[swapIndex[2]]<-swapValues[2]
       }
     }
-    #break if reached desired I.
+    # Break if reached desired I.
     if(iNow > min && iNow <=max)
     {
       break
@@ -287,7 +287,7 @@ generate.map <- function(data, min, max, path1Text, path1Map, path2Text, path2Ma
     weightedVal<- weightedVal+(idata*iarea)
   }
   
-  #average attribute value per unit of area
+  # Average attribute value per unit of area
   area<-gArea(data, byid=FALSE)/1000/1000
   weightedVal<-weightedVal/area
   
@@ -300,7 +300,7 @@ generate.map <- function(data, min, max, path1Text, path1Map, path2Text, path2Ma
   
   write(c(iNow,iNowSquared, iNowNon,weightedVal),sep = ",",file=path1Text)
   
-  #draw maps
+  # Draw maps
   map1<- tm_shape(data) +
     tm_fill(c("permutation"),style="cont", palette="YlOrBr")+
     tm_borders(col="gray80", lwd=2)+
@@ -350,20 +350,20 @@ map <- function(value, min1, max1, min2, max2)
 
 # ----------- generate maps for a given geography ------
 
-# setup folder structure
+# Setup folder structure
 mainDir<- getwd()
 subDir<-"tests"
 dir.create(file.path(mainDir,subDir), showWarnings = FALSE)
 targetDirs<- c("moran_0.9","moran_0.8","moran_0.7","moran_0.6","moran_0.5","moran_0.4","moran_0.3","moran_0.2")
 targets<-c(0.9, 0.8,0.7,0.6,0.5,0.4,0.3,0.2)
 
-# find a geography 
+# Find a geography 
 geog1 <- find.geography(england_msoas, msoas, england_OAs, 0, 0.4)
 plot(geog1)
 geog1<- create.attribute.data(geog1)
 region<- geog1
 
-# Generate maps in folder structure used by survey software. Additionally save in text files, contextual data used for exploratpry analysis: coloir value per unit area, actual Moran's I, using different weighting schemes.
+# Generate maps in folder structure used by survey software. Additionally save in text files contextual data used for exploratory analysis: colour value per unit area, actual Moran's I, using different weighting schemes.
 geogDir<-"geography_1"
 generate.dirs.geography(mainDir, subDir, geogDir, targetDirs)
 generate.stimulus.geography(mainDir, subDir, geogDir, targetDirs, targets, region)

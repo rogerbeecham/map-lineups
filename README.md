@@ -1,5 +1,5 @@
 
-# Supplementary details for: _Map line-ups: using graphical inference to study spatial structure_
+# Supplementary details for _Map line-ups: using graphical inference to study spatial structure_
 
 _Roger Beecham_ <br>
 _Jason Dykes_ <br>
@@ -8,7 +8,7 @@ _Aidan Slingsby_ <br>
 _Cagatay Turkay_ <br>
 _Jo Wood_ <br>
 
-This document contains supplementary information for our paper: _Map line-ups: using graphical inference to study
+This document contains supplementary information for our paper _Map line-ups: using graphical inference to study
   spatial structure_.  It outlines the procedure for the experiment (on which the paper is based), code that can be used to run the experiment locally and code used for the data analysis. Note that this draws heavily on the work already published in [Harrison _et al._](https://github.com/TuftsVALT/ranking-correlation) and  [Kay & Heer](https://github.com/mjskay/ranking-correlation).
 
 
@@ -145,7 +145,7 @@ create.attribute.data <- function(data)
   data@data<-merge(data@data, temp, by="CODE")
   return(data)
 ```
-Next we create a function for creating maps with a stated Moran's _I_. The simplest means is the permutation based approach used in [Wickham _et al._](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=5613434). The problem is that this becomes very slow where wish to have even moderate  Moran's _I_. An alternative option (more of an edit): randomly pick pairs of OAs, swap the attribute values and if difference in _I_ to the target Moran's _I_ decreases, keep the values swapped.
+Next we develop a function for creating maps with a stated [Moran's _I_](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-35973-1_817). The simplest means is the permutation based approach used in [Wickham _et al._](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=5613434). The problem is that this becomes very slow where we wish to have even moderate  Moran's _I_. An alternative option (more of an edit): randomly pick pairs of OAs, swap the attribute values and if difference in _I_ to the target Moran's _I_ decreases, keep the values swapped.
 
 ```r
 generate.map <- function(data, min, max)
@@ -246,6 +246,6 @@ You will need to install [_MySQL_](https://dev.mysql.com/usingmysql/get_started.
 
 To try the survey enter ```localhost:8888``` into a browser.
 
-## Analysis
+# Analysis
 
 [under development]
