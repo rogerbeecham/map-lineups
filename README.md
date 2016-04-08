@@ -1,20 +1,19 @@
 
 # Supplementary details for _Map line-ups: using graphical inference to study spatial structure_
 
-_Roger Beecham_ <br>
+_Roger Beecham_ (contact [roger.beecham@city.ac.uk](mailto:roger.beecham@city.ac.uk)) <br>
 _Jason Dykes_ <br>
 _Wouter Meulemans_ <br>
 _Aidan Slingsby_ <br>
 _Cagatay Turkay_ <br>
 _Jo Wood_ <br>
 
-This document contains supplementary information for our paper _Map line-ups: using graphical inference to study
-  spatial structure_.  It outlines the procedure for the experiment (on which the paper is based), code that can be used to run the experiment locally and code used for the data analysis. Note that this draws heavily on the work already published in [Harrison _et al._](https://github.com/TuftsVALT/ranking-correlation) and  [Kay & Heer](https://github.com/mjskay/ranking-correlation).
+This document contains supplementary information for our paper _Map line-ups: using graphical inference to study spatial structure_.  It outlines the procedure for the experiment (on which the paper is based), code that can be used to run the experiment locally and code used for the data analysis. Note that this draws heavily on work  published in [Harrison _et al._](https://github.com/TuftsVALT/ranking-correlation) and  [Kay & Heer](https://github.com/mjskay/ranking-correlation).
 
 
 # Experiment
 
-Below is some code and discussion of how we generate the stimulus used in the experiment. Code for the experiment itself can be found [experiment/](experiment). Instructions for trying this locally are at the end of this section.  
+Below is some code and discussion of how we generate the stimulus used in the experiment. Code for the survey software can be found in [experiment/](experiment). Instructions for trying this locally are at the end of this section.  
 
 All stimuli used in the test were created using R.  
 
@@ -69,7 +68,7 @@ Motivating the study is the need to evaluate the line-up protocol when applied t
 Below are two approaches to generating these _real_ regions using English Output Areas (OAs):
 
 1. Load a SpatialDataFrame containing all OAs, sample an OA, then find its 50 nearest neighbours.
-2. Load a spatial data frame containing all Middle Super Output Areas MSOAs. MSOAs contain on avergae 25 OAs. Sample an MSOA and find its nearest neighbour -- thus we end up with c. 50 geog units, but their grouping is more _real_, since MSOAs are a genuine administrative geography.
+2. Load a spatial data frame containing all Middle Super Output Areas MSOAs. MSOAs contain on avergae 25 OAs. Sample an MSOA and find its nearest neighbour -- thus we end up with c. 50 geog units, but their grouping is more _real_ since MSOAs are a genuine administrative geography.
 
 Next, we need to decide on different geometries of these regions to use in the testing. We want to see if ability at performing line-up tests varies with regions of increasingly irregularity. But we again want these definitions of irregular geometry to be plausible. One approach may be to find this distribution of plausible regions empirically: generate c.1000 regions using approach 2, calculate summary statistics on these and sample from different parts of this distribution.
 
@@ -145,7 +144,7 @@ create.attribute.data <- function(data)
   data@data<-merge(data@data, temp, by="CODE")
   return(data)
 ```
-Next we develop a function for creating maps with a stated [Moran's _I_](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-35973-1_817). The simplest means is the permutation based approach used in [Wickham _et al._](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=5613434). The problem is that this becomes very slow where we wish to have even moderate  Moran's _I_. An alternative option (more of an edit): randomly pick pairs of OAs, swap the attribute values and if difference in _I_ to the target Moran's _I_ decreases, keep the values swapped.
+Next we develop a function for creating maps with a stated [Moran's _I_](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-35973-1_817). The simplest means is the permutation based approach used in [Wickham _et al._](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=5613434). The problem is that this becomes very slow where we wish to generate even moderate  Moran's _I_. An alternative option (more of an edit): randomly pick pairs of OAs, swap the attribute values and if difference in _I_ to the target Moran's _I_ decreases, keep the values swapped.
 
 ```r
 generate.map <- function(data, min, max)
@@ -242,10 +241,163 @@ R scripts for generating maps in the directory structure used by our survey soft
 
 ## Trying the survey
 
-You will need to install [_MySQL_](https://dev.mysql.com/usingmysql/get_started.html) and  [_MAMP_](https://www.mamp.info/en/) -- the latter of which  enables _PHP_ and _MySQL_ to be run locally. After installing _MAMP_, select ```preferences```, ```web server``` and navigate to ```../experiment/```. After ```start servers```, open a browser and enter ```localhost:8888/admin_initialize.php```. As well as creating the _MySQL_ dbase (called _maplineups_) and tables, this reads the pushed sample maps stored as .png files in [tests/](experiment/tests/) and creates a ```../stimuli/``` folder, which is used by the dbase and survey software. To reduce the size of this repository, grid maps only are pushed. Open a _MySQL_ dbase connection via ```root``` and use the recently created  maplineups dbase. This should contain five tables: _lineup_, _lineupanswer_, _map_, _participantgroup_, _user_.  
+You will need to install [_MySQL_](https://dev.mysql.com/usingmysql/get_started.html) and  [_MAMP_](https://www.mamp.info/en/) -- the latter of which  enables _PHP_ and _MySQL_ to be run locally. After installing _MAMP_, select ```preferences```, ```web server``` and navigate to ```../experiment/```. After ```start servers```, open a browser and enter ```localhost:8888/admin_initialize.php```. As well as creating the _MySQL_ dbase (called _maplineups_) and tables, this reads the pushed sample maps stored as .png files in [tests/](experiment/tests/) and creates a ```../stimuli/``` folder, which is used by the dbase and survey software. To reduce the size of this repository, regular grids only are currently in the repository. Open a _MySQL_ dbase connection via ```root``` and use the recently created  maplineups dbase. This should contain five tables: _lineup_, _lineupanswer_, _map_, _participantgroup_, _user_.  
 
-To try the survey enter ```localhost:8888``` into a browser.
+To try the survey enter ```localhost:8888``` into a browser. Do contact us if any problems following these (rather terse) instructions: [roger.beecham@city.ac.uk](mailto:roger.beecham@city.ac.uk)).
 
 # Analysis
 
-[under development]
+``` r
+# Required packages
+library(magrittr)
+library(dplyr)
+library(ggplot2)
+library(RColorBrewer)
+
+# Data
+data <- read.csv("data/data.csv", header = TRUE)
+```
+
+## Data cleaning
+
+ We are only able to publish aggregate _JND_ scores rather than the raw interactions on which the _JNDs_ are based. These can be compared with those published at [Harrison _et al._'s github](https://github.com/TuftsVALT/ranking-correlation).
+
+ Our data exhibit substantial compression of _JNDs_ due to approach: where the approach is from above and baseline Moran's _I_ is high, scores are overly squashed; and the same happens when the base is low and the approach is from below.
+
+``` r
+# Plot raw data and fit linear regression as described in Figure 2 of Kay & Heer -- highlights the problem of compression due to approach.
+colours <- brewer.pal(5,"Set1")
+names(colours) <- levels(data$approach)
+col_scale <- scale_colour_manual(name = "aproach",values = colours)
+
+data  %>%
+  ggplot(
+    aes(x=base, y=jnd, color=approach)
+  ) +
+  geom_point(size=3, alpha=.25) +  
+  coord_fixed()+
+  stat_smooth(method=lm, se=FALSE, size=1, linetype="dashed") +
+  stat_smooth(method=lm, se=FALSE, aes(group=NA), size=1, color="black", linetype="dashed") +
+  scale_color_manual(values=c(colours[2], colours[1]))+
+  ylim(0,0.8)+
+  scale_x_continuous(limits=c(0.1,1), breaks=seq(0,1, by=0.2))+
+  facet_wrap(~geography)+
+  theme_bw()
+
+```
+
+![plot of chunk raw_jnds_compressed](figures/raw_jnds_compressed.png)
+
+Such a large compression of scores is not observed in  Harrison _et al._'s derived _JNDs_. We also see evidence of substantial between-participant variability (also observed in Harrison _et al._). Notice that variability in _JNDs_ increases as the geography becomes more irregular.
+
+Harrison _et al._ discuss the problem of outliers and use a threshold of 3 absolute deviations from the median for each base _x_ approach _x_ visualization-type combination. This does not solve the substantial outliers we observe for the _irregular real_ geography and a base of 0.7/0.8. Harrison _et al._ also identify a chance boundary for JND – the JND in the staircase procedure that would result from participants randomly guessing through the staircase (JND = 0.45). We also calculate a chance boundary for JND by simulating the staircase procedure, but pay attention to how this boundary varies by each test-case (approach _x_ base pair).
+
+``` r
+# Calculate chance by running the simulate_chance.R script
+source("src/simulate_chance.R")
+data<-merge(data, chance_by_condition)
+colnames(chance_by_condition)<- c("base","approach","chance_jnd")
+data<-merge(data, chance_by_condition)
+data <- data %>%
+  mutate(
+    is_chance = jnd>chance_jnd
+  )
+```
+
+Clearly, chance in the staircase will vary for different approach _x_ base pairs and will tend towards the ceilings where the base is high and the approach is from above and the floors where the approach is from below and the base is low. The censoring method described in Kay & Heer may be one approach to treating outliers where scores are not artificially compressed – for example where the base is 0.8, the approach is from below and the estimated JND is 0.7: an obvious outlier. This score would be censored to 0.4, ```min(base−0.05,0.4)```. Given the precision with which we estimate JND, simply censoring to these thresholds would not, as we understand it, remove the observed compression effect. As an example, if the approach is from above and the baseline Moran’s _I_ is 0.7, then Kay & Heer’s censoring would limit _JNDs_ to ```min(0.95 − base, 0.4) → 0.25``` – too small given the _JNDs_ we estimate for 0.7 using the below approach.
+
+The method described in the paper for removing the artificial compression effect due to approach is to remove  approach _x_ base pairs where there is not enough data difference to play with: below with a base of 0.3 and 0.2, and above with a base of 0.7, 0.8 and 0.9:
+
+```r
+# Remove ceiling and floors due to approach
+data <- data %>%
+  mutate(exclude = ifelse( (base < 0.4  & approach == "below")
+                           | (base> 0.6 & approach == "above"),
+                         TRUE, FALSE))
+
+# And resample midbases to prevent giving greater weight to these test cases in the analysis.
+source("src/resample_midbases.R")
+
+```  
+
+Finally, we decide on how to clean outliers. Given that our test is comparatively more challenging than the non-spatial equivalent – it is conceivable that, for the irregular geography, participants could not distinguish between a Moran’s _I_ of 0.4 and 0.8 – we decide against pinning outliers to the chance threshold used in Kay & Heer (of ~0.4). Instead we remove all estimated _JNDs_ where the accuracy rate on which the score is based begins to approach chance (< 0.55).
+
+## Model specification
+
+We first compare differences in mean _JND_ observed for each geography and find that as the geometry of our study regions becomes more irregular, _JND_ increases.  
+
+``` r
+library(effsize)
+
+cohens_data <- data_model %>% filter(accuracy>0.55)
+
+cohen.d(cohens_data[cohens_data$geography=="1_grid",]$jnd, cohens_data[cohens_data$geography=="3_irreg" ,]$jnd)
+
+## d estimate: -0.7060453 (medium)
+## 95 percent confidence interval:
+##        inf        sup
+## -0.9107018 -0.5013888
+
+cohen.d(cohens_data[cohens_data$geography=="1_grid",]$jnd, cohens_data[cohens_data$geography=="2_reg" ,]$jnd)
+
+## d estimate: -0.3071126 (small)
+## 95 percent confidence interval:
+##        inf        sup
+## -0.5037327 -0.1104925
+
+cohen.d(cohens_data[cohens_data$geography=="2_reg",]$jnd, cohens_data[cohens_data$geography=="3_irreg" ,]$jnd)
+
+# Cohen's d
+
+## d estimate: -0.4094879 (small)
+## 95 percent confidence interval:
+##       inf        sup
+## -0.5964104 -0.2225653
+
+```
+
+Following Kay & Heer, we compare linear models with and without log transformation of the outcome (_JND_). We borrow the plotting function provided at [Kay & Heer's github](https://github.com/mjskay/ranking-correlation). Log transformation improves problems of skew and kurtosis in residuals for the _regular real_ geography.
+
+``` r
+library(gamlss)
+m.linear.reg = gamlss(jnd ~ base,
+                             data=data_model%>% filter(geography=="2_reg", accuracy>0.55)
+)
+
+m.loglinear.reg = gamlss(jnd ~ base,
+                                data=data_model %>% filter(geography=="2_reg", accuracy>0.55),
+                                family=LOGNO
+)
+
+# This uses the plotting function provided by Kay & Heer.
+plot_model_residuals(m.linear.reg)
+plot_model_residuals(m.loglinear.reg)
+```
+
+![plot of chunk residuals_linear_vs_log](figures/residuals_linear_vs_log.png)
+
+Kay & Heer also identify the problem of participant effects. Each participant contributes up to four data points and we might expect two randomly sampled observations from the same participant to be more similar than from a different participant (these observations are not independent). We therefore add a varying-intercept random effect on participant. We define three models for each geography.
+
+```
+library(lme4)
+m.grid <- lmer(log(jnd) ~ base + (1|user_id), data=data_model %>% filter(geography=="1_grid", accuracy>0.55))
+m.reg <- lmer(log(jnd) ~ base + (1|user_id), data=data_model %>% filter(geography=="2_reg", accuracy>0.55))
+m.irreg <- lmer(log(jnd) ~ base + (1|user_id), data=data_model %>% filter(geography=="3_irreg", accuracy>0.55))
+library(MuMIn) # for pseudo-rsquared
+r.squaredGLMM(m.reg)
+
+```
+
+We evaluate the models from estimated regression coefficients, model fits and prediction intervals. Note that direct comparisons between _regular grid_ and the _real_ geographies should be treated cautiously since we do not have data at bases of 0.2 and 0.9 for the _regular grid_ case.
+
+|      complexity      | exp(intercept) |   exp(slope)  | pseudo R<sup>2</sup> fixed | pseudo R<sup>2</sup> fixed+random |
+|:--------------------:|:--------------:|:-------------:|:--------------------------:|:---------------------------------:|
+|    _regular grid_    |      0.311     |    -0.344     |           0.15             |              0.16                 |
+|    _regular real_    |      0.312     |    -0.438     |           0.12             |              0.42                 |
+|   _irregular real_   |      0.424     |    -0.370     |           0.13             |              0.51                 |
+
+```r
+source("src/plot_prediction_intervals.R")
+```
+
+![plot of chunk plot_prediction_intervals](figures/plot_prediction_intervals.png)
