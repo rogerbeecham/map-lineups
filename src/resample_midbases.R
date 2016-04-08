@@ -1,4 +1,4 @@
-# We need to make re-sample each condition where we data are from above and below. To update -- a more elegant way of doing this.
+# We need to re-sample each condition where data are from above and below. 
 tmp0.4_grid_above<- data %>% filter(base == 0.4, geography == "1_grid", approach=="above", accuracy>0.55)
 tmp0.4_grid_above<- tmp0.4_grid_above[sample(nrow(tmp0.4_grid_above),15),]
 tmp0.4_grid_below<- data %>% filter(base == 0.4, geography == "1_grid", approach=="below", accuracy>0.55)
