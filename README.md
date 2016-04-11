@@ -143,6 +143,7 @@ create.attribute.data <- function(data)
   colnames(temp)<- c("CODE","value")
   data@data<-merge(data@data, temp, by="CODE")
   return(data)
+}
 ```
 Next we develop a function for creating maps with a stated [Moran's _I_](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-35973-1_817). The simplest means is the permutation based approach used in [Wickham _et al._](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=5613434). The problem is that this becomes very slow where we wish to generate even moderate  Moran's _I_. An alternative option (more of an edit): randomly pick pairs of OAs, swap the attribute values and if difference in _I_ to the target Moran's _I_ decreases, keep the values swapped.
 
@@ -271,9 +272,7 @@ names(colours) <- levels(data$approach)
 col_scale <- scale_colour_manual(name = "aproach",values = colours)
 
 data  %>%
-  ggplot(
-    aes(x=base, y=jnd, color=approach)
-  ) +
+  ggplot(aes(x=base, y=jnd, color=approach)) +
   geom_point(size=3, alpha=.25) +  
   coord_fixed()+
   stat_smooth(method=lm, se=FALSE, size=1, linetype="dashed") +
@@ -298,10 +297,7 @@ source("src/simulate_chance.R")
 data<-merge(data, chance_by_condition)
 colnames(chance_by_condition)<- c("base","approach","chance_jnd")
 data<-merge(data, chance_by_condition)
-data <- data %>%
-  mutate(
-    is_chance = jnd>chance_jnd
-  )
+data <- data %>% mutate(is_chance = jnd>chance_jnd)
 ```
 
 Clearly, chance in the staircase will vary for different approach _x_ base pairs and will tend towards the ceilings where the base is high and the approach is from above and the floors where the approach is from below and the base is low. The censoring method described in Kay & Heer may be one approach to treating outliers where scores are not artificially compressed – for example where the base is 0.8, the approach is from below and the estimated JND is 0.7: an obvious outlier. This score would be censored to 0.4, ```min(base−0.05,0.4)```. Given the precision with which we estimate JND, simply censoring to these thresholds would not, as we understand it, remove the observed compression effect. As an example, if the approach is from above and the baseline Moran’s _I_ is 0.7, then Kay & Heer’s censoring would limit _JNDs_ to ```min(0.95 − base, 0.4) → 0.25``` – too small given the _JNDs_ we estimate for 0.7 using the below approach.
@@ -360,14 +356,9 @@ Following Kay & Heer, we compare linear models with and without log transformati
 
 ``` r
 library(gamlss)
-m.linear.reg = gamlss(jnd ~ base,
-                             data=data_model%>% filter(geography=="2_reg", accuracy>0.55)
-)
+m.linear.reg = gamlss(jnd ~ base,data=data_model%>% filter(geography=="2_reg", accuracy>0.55)
 
-m.loglinear.reg = gamlss(jnd ~ base,
-                                data=data_model %>% filter(geography=="2_reg", accuracy>0.55),
-                                family=LOGNO
-)
+m.loglinear.reg = gamlss(jnd ~ base, data=data_model %>% filter(geography=="2_reg", accuracy>0.55), family=LOGNO)
 
 # This uses the plotting function provided by Kay & Heer.
 plot_model_residuals(m.linear.reg)
