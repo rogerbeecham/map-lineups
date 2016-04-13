@@ -8,14 +8,14 @@ _Aidan Slingsby_ <br>
 _Cagatay Turkay_ <br>
 _Jo Wood_ <br>
 
-This document contains supplementary information for our paper _Map line-ups: using graphical inference to study spatial structure_.  It outlines the procedure for the experiment (on which the paper is based), code that can be used to run the experiment locally and code used for the data analysis. Note that this draws heavily on work  published in [Harrison _et al._](https://github.com/TuftsVALT/ranking-correlation) and  [Kay & Heer](https://github.com/mjskay/ranking-correlation).
+This document contains supplementary information for our paper, _Map line-ups: using graphical inference to study spatial structure_.  It outlines the procedure for the experiment (on which the paper is based), code that can be used to run the experiment locally and code used in the data analysis. Note that this draws heavily on work  published in [Harrison _et al._](https://github.com/TuftsVALT/ranking-correlation) and  [Kay & Heer](https://github.com/mjskay/ranking-correlation).
 
 
 # Experiment
 
-Below is some code and discussion of how we generate the stimulus used in the experiment. Code for the survey software can be found in [experiment/](experiment). Instructions for trying this locally are at the end of this section.  
+Below is some code and discussion of how we generate the stimuli used in the experiment. The survey software can be found in [experiment/](experiment). Instructions for trying this locally are at the end of this section.  
 
-All stimuli used in the test were created using R.  
+All stimuli used in the experiment were created using R.  
 
 ## Configure R
 
@@ -63,12 +63,12 @@ colnames(candidate_msoas) <- c("msoa")
 
 ## Generating _real_ study regions
 
-Motivating the study is the need to evaluate the line-up protocol when applied to choropleth maps. We want to come up with recommendations for constructing line-up tests in _real_ data analysis scenarios. So we want ecological validity in the stimuli we create. Because of this, we believe there's a strong argument for using real geographic regions as well as testing against more contrived situations (e.g. regular grids).
+Motivating our study is the need to evaluate Wickham _et al_'s line-up protocol when applied to choropleth maps. We want to come up with recommendations for constructing line-up tests in _real_ data analysis scenarios. So we want ecological validity in the stimuli we create. Because of this, we believe there's a strong argument for using real geographic regions as well as testing against more contrived situations (e.g. regular grids).
 
 Below are two approaches to generating these _real_ regions using English Output Areas (OAs):
 
 1. Load a SpatialDataFrame containing all OAs, sample an OA, then find its 50 nearest neighbours.
-2. Load a spatial data frame containing all Middle Super Output Areas MSOAs. MSOAs contain on avergae 25 OAs. Sample an MSOA and find its nearest neighbour -- thus we end up with c. 50 geog units, but their grouping is more _real_ since MSOAs are a genuine administrative geography.
+2. Load a spatial data frame containing all Middle Super Output Areas MSOAs. MSOAs contain on average 25 OAs. Sample an MSOA and find its nearest neighbour -- thus we end up with c. 50 geographic units, but their grouping is more _real_ since MSOAs are a genuine administrative geography.
 
 Next, we need to decide on different geometries of these regions to use in the testing. We want to see if ability at performing line-up tests varies with regions of increasingly irregularity. But we again want these definitions of irregular geometry to be plausible. One approach may be to find this distribution of plausible regions empirically: generate c.1000 regions using approach 2, calculate summary statistics on these and sample from different parts of this distribution.
 
@@ -145,7 +145,7 @@ create.attribute.data <- function(data)
   return(data)
 }
 ```
-Next we develop a function for creating maps with a stated [Moran's _I_](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-35973-1_817). The simplest means is the permutation based approach used in [Wickham _et al._](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=5613434). The problem is that this becomes very slow where we wish to generate even moderate  Moran's _I_. An alternative option (more of an edit): randomly pick pairs of OAs, swap the attribute values and if difference in _I_ to the target Moran's _I_ decreases, keep the values swapped.
+Next we develop a function for creating maps with a stated [Moran's _I_](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-35973-1_817). The simplest means is the permutation based approach used in [Wickham _et al._](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=5613434). The problem is that this becomes very slow where we wish to generate even moderate Moran's _I_. An alternative option (more of an edit): randomly pick pairs of OAs, swap the attribute values and if difference in _I_ to the target Moran's _I_ decreases, keep the values swapped.
 
 ```r
 generate.map <- function(data, min, max)
@@ -242,7 +242,7 @@ R scripts for generating maps in the directory structure used by our survey soft
 
 ## Trying the survey
 
-You will need to install [_MySQL_](https://dev.mysql.com/usingmysql/get_started.html) and  [_MAMP_](https://www.mamp.info/en/) -- the latter of which  enables _PHP_ and _MySQL_ to be run locally. After installing _MAMP_, select ```preferences```, ```web server``` and navigate to ```../experiment/```. After ```start servers```, open a browser and enter ```localhost:8888/admin_initialize.php```. As well as creating the _MySQL_ dbase (called _maplineups_) and tables, this reads the pushed sample maps stored as .png files in [tests/](experiment/tests/) and creates a ```../stimuli/``` folder, which is used by the dbase and survey software. To reduce the size of this repository, regular grids only are currently in the repository. Open a _MySQL_ dbase connection via ```root``` and use the recently created  maplineups dbase. This should contain five tables: _lineup_, _lineupanswer_, _map_, _participantgroup_, _user_.  To try the survey enter ```localhost:8888``` into a browser.
+You will need to install [_MySQL_](https://dev.mysql.com/usingmysql/get_started.html) and  [_MAMP_](https://www.mamp.info/en/) -- the latter of which  enables _PHP_ and _MySQL_ to be run locally. After installing _MAMP_, select ```preferences```, ```web server``` and navigate to ```../experiment/```. After ```start servers```, open a browser and enter ```localhost:8888/admin_initialize.php```. As well as creating the _MySQL_ dbase (called _maplineups_) and required tables, this reads the pushed sample maps stored as .png files in [tests/](experiment/tests/) and creates a ```../stimuli/``` folder, which is used by the dbase and survey software. To reduce the size of this repository regular grids only have been uploaded. Open a _MySQL_ dbase connection via ```root``` and use the recently created  maplineups dbase. This should contain five tables: _lineup_, _lineupanswer_, _map_, _participantgroup_, _user_.  To try the survey enter into a browser: ```localhost:8888```.
 
 Do get in touch if you encounter any problems following these (rather terse) instructions: [roger.beecham@city.ac.uk](mailto:roger.beecham@city.ac.uk).
 
@@ -367,7 +367,7 @@ plot_model_residuals(m.loglinear.reg)
 
 ![plot of chunk residuals_linear_vs_log](figures/residuals_linear_vs_log.png)
 
-Kay & Heer also identify the problem of participant effects. Each participant contributes up to four data points and we might expect two randomly sampled observations from the same participant to be more similar than from a different participant (these observations are not independent). We therefore add a varying-intercept random effect on participant. We define three models for each geography.
+Kay & Heer also identify the problem of participant effects. Each participant contributes up to four data points and we might expect two randomly sampled observations from the same participant to be more similar than from a different participant. We therefore add a varying-intercept random effect on participant. We define three models for each geography.
 
 ```
 library(lme4)
@@ -379,7 +379,7 @@ r.squaredGLMM(m.reg)
 
 ```
 
-We evaluate the models from estimated regression coefficients, model fits and prediction intervals. Note that direct comparisons between _regular grid_ and the _real_ geographies should be treated cautiously since we do not have data at bases of 0.2 and 0.9 for the _regular grid_ case.
+We evaluate the models using estimated regression coefficients, model fits and prediction intervals. Note that direct comparisons between _regular grid_ and the _real_ geographies should be treated cautiously since we do not have data at bases of 0.2 and 0.9 for the _regular grid_ case.
 
 |      complexity      | exp(intercept) |   exp(slope)  | pseudo R<sup>2</sup> fixed | pseudo R<sup>2</sup> fixed+random |
 |:--------------------:|:--------------:|:-------------:|:--------------------------:|:---------------------------------:|
