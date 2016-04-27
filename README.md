@@ -367,7 +367,7 @@ plot_model_residuals(m.loglinear.reg)
 
 ![plot of chunk residuals_linear_vs_log](figures/residuals_linear_vs_log.png)
 
-Kay & Heer also identify the problem of participant effects. Each participant contributes up to four data points and we might expect two randomly sampled observations from the same participant to be more similar than from a different participant. We therefore add a varying-intercept random effect on participant. We define three models for each geography.
+Kay & Heer also identify the problem of participant effects. Each participant contributes up to four data points and we might expect two randomly sampled observations from the same participant to be more similar than from a different participant. We therefore add a varying-intercept random effect on participant. We define one model for each geography.
 
 ```
 library(lme4)
