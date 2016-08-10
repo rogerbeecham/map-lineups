@@ -8,7 +8,7 @@ _Aidan Slingsby_ <br>
 _Cagatay Turkay_ <br>
 _Jo Wood_ <br>
 
-This document contains supplementary information for our paper, _Map LineUps: effects of spatial structure on graphical inference_.  It outlines the procedure for the experiment (on which the paper is based), code that can be used to run the experiment locally and code used in the data analysis. Note that this draws heavily on work  published in [Harrison _et al._](https://github.com/TuftsVALT/ranking-correlation) and  [Kay & Heer](https://github.com/mjskay/ranking-correlation).
+This document contains supplementary information for our paper, [_Map LineUps: effects of spatial structure on graphical inference_](http://www.gicentre.net/maplineups).  It outlines the procedure for the experiment (on which the paper is based), code that can be used to run the experiment locally and code used in the data analysis. Note that this draws heavily on work  published in [Harrison _et al._](https://github.com/TuftsVALT/ranking-correlation) and  [Kay & Heer](https://github.com/mjskay/ranking-correlation).
 
 
 # Experiment
