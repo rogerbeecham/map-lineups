@@ -90,7 +90,6 @@ find.geography <- function(england_msoas, msoas, england_OAs, coef_var_min, coef
       centroids <- gCentroid(sample_geoms, byid=TRUE)
       nni<- mean(nndist(centroids@coords))/(0.5*sqrt(gArea(sample_geoms, byid=FALSE)/length(sample_geoms@data$row)))
       coef_var <- sd(gArea(sample_geoms, byid=TRUE)/1000/1000)/mean(gArea(sample_geoms, byid=TRUE)/1000/1000)
-
       if(calculate_coef_var)
       {
           if(coef_var > coef_var_min && coef_var < coef_var_max && length(sample_geoms) > 44 && length(sample_geoms) < 56 )
@@ -153,7 +152,6 @@ generate.map <- function(data, min, max)
   data_dsts <- nbdists(data_nb, coordinates(data))
   idw <- lapply(data_dsts, function(x) 1/x)
   data_lw <- nb2listw(data_nb, glist = idw)
-
   repeat
   {
     # Start with a new permutation
@@ -162,7 +160,6 @@ generate.map <- function(data, min, max)
     i_old <- i_now
     d_old <-NULL
     d_old <- sqrt((i_now-max)^2)
-
     # If after 5000 attempts, still not reached desired Moran's I, then try a new permutation.
     for(j in 1:5000)
     {
@@ -171,20 +168,16 @@ generate.map <- function(data, min, max)
       {
         break
       }  
-
       # Sample two distinct positions  
       swap_index <- sample(1:nrow(permutation),2, replace=FALSE)
       # Get values corresponding to these positions
       swapValues <- sapply(swap_index,function(row_index){return(permutation$value[row_index])})
-
       # Swap the values
       permutation$value[swap_index[1]]<-swap_values[2]
       permutation$value[swap_index[2]]<-swap_values[1]
-
       # Calculate new Moran's I  
       i_now <- moran.test(permutation$value, data.lw)$estimate[1]
       d_now=sqrt((i_now-max)^2)
-
       # Revert back if it's not reduced distance to targets
       if(d_now<d_old)
       {
@@ -204,16 +197,13 @@ generate.map <- function(data, min, max)
       break
     }  
   }
-
   data@data <- cbind(data@data,permutation$value);
   colnames(data@data)[4] <- "permutation"
-
   # Draw maps
   map <- tm_shape(data) +
     tm_fill(c("permutation"),style="cont", palette="YlOrBr")+
     tm_borders(col="gray80", lwd=1)+
     tm_layout(legend.show=FALSE,frame=FALSE)
-
   return(map)
 }
 ```
@@ -267,7 +257,6 @@ data <- read.csv("data/data.csv", header = TRUE)
 colours <- brewer.pal(5,"Set1")
 names(colours) <- levels(data$approach)
 col_scale <- scale_colour_manual(name = "aproach",values = colours)
-
 data  %>%
   ggplot(aes(x=base, y=jnd, color=approach)) +
   geom_point(size=3, alpha=.25) +  
@@ -279,7 +268,6 @@ data  %>%
   scale_x_continuous(limits=c(0.1,1), breaks=seq(0,1, by=0.2))+
   facet_wrap(~geography)+
   theme_bw()
-
 ```
 
 ![plot of chunk raw_jnds_compressed](figures/raw_jnds_compressed.png)
@@ -307,10 +295,8 @@ data <- data %>%
   mutate(exclude = ifelse( (base < 0.4  & approach == "below")
                            | (base> 0.6 & approach == "above"),
                          TRUE, FALSE))
-
 # And resample midbases to prevent giving greater weight to these test cases in the analysis.
 source("src/resample_midbases.R")
-
 ```  
 
 Finally, we decide on how to clean outliers. Given that our test is comparatively more challenging than the non-spatial equivalent – it is conceivable that, for the irregular geography, participants could not distinguish between a Moran’s _I_ of 0.4 and 0.8 – we decide against pinning outliers to the chance threshold used in Kay & Heer (of ~0.4). Instead we remove all estimated JNDs where the accuracy rate on which the score is based begins to approach chance (< 0.55).
@@ -321,40 +307,32 @@ We first compare differences in mean JND observed for each geography and find th
 
 ``` r
 library(effsize)
-
 cohens_data <- data_model %>% filter(accuracy>0.55)
-
 cohen.d(cohens_data[cohens_data$geography=="1_grid",]$jnd, cohens_data[cohens_data$geography=="3_irreg" ,]$jnd)
-
 ## d estimate: -0.7060453 (medium)
 ## 95 percent confidence interval:
 ##        inf        sup
 ## -0.9107018 -0.5013888
 
 cohen.d(cohens_data[cohens_data$geography=="1_grid",]$jnd, cohens_data[cohens_data$geography=="2_reg" ,]$jnd)
-
 ## d estimate: -0.3071126 (small)
 ## 95 percent confidence interval:
 ##        inf        sup
 ## -0.5037327 -0.1104925
 
 cohen.d(cohens_data[cohens_data$geography=="2_reg",]$jnd, cohens_data[cohens_data$geography=="3_irreg" ,]$jnd)
-
 ## d estimate: -0.4094879 (small)
 ## 95 percent confidence interval:
 ##       inf        sup
 ## -0.5964104 -0.2225653
-
 ```
 
 Following Kay & Heer, we compare linear models with and without log transformation of the outcome (JND). We borrow the plotting function provided at [Kay & Heer's github](https://github.com/mjskay/ranking-correlation). Log transformation improves problems of skew and kurtosis in residuals for the _regular real_ geography.
 
 ``` r
 library(gamlss)
-m_linear_reg = gamlss(jnd ~ base,data=data_model%>% filter(geography=="2_reg", accuracy>0.55)
-
-m_loglinear_reg = gamlss(jnd ~ base, data=data_model %>% filter(geography=="2_reg", accuracy>0.55), family=LOGNO)
-
+m_linear_reg <- gamlss(jnd ~ base,data=data_model%>% filter(geography=="2_reg", accuracy>0.55)
+m_loglinear_reg <- gamlss(jnd ~ base, data=data_model %>% filter(geography=="2_reg", accuracy>0.55), family=LOGNO)
 # This uses the plotting function provided by Kay & Heer.
 plot.model.residuals(m_linear_reg)
 plot.model.residuals(m_loglinear_reg)
