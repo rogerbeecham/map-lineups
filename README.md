@@ -44,18 +44,19 @@ library(dplyr)
 england_OAs <- readOGR(dsn = "shapefiles", layer = "england_oa_2011")
 england_OAs@data$row <- 1:nrow(england_OAs@data)
 proj4string(england_OAs) <- CRS("+init=epsg:27700")
-spTransform(england_OAs, CRS("+init=epsg:27700 +units=km"))
-england_msoas <- readOGR(dsn = "shapefiles", layer = "msoa_boundaries") # middle super output areas (for grouping output areas)
+# Middle super output areas (for grouping output areas)
+england_msoas <- readOGR(dsn = "shapefiles", layer = "msoa_boundaries")
 england_msoas@data$row <- 1:nrow(england_msoas@data)
 proj4string(england_msoas) <- CRS("+init=epsg:27700")
-spTransform(england_msoas, CRS("+init=epsg:27700 +units=km"))
 colnames(england_msoas@data) <- c("msoa","msoaNm","msoaNm2","row")
-msoas <- read.csv("shapefiles/oa_msoa.csv", header = TRUE) # oa to msoa lookup
+# oa to msoa lookup
+msoas <- read.csv("shapefiles/oa_msoa.csv", header = TRUE)
 msoas <- msoas[,1:4]
-msoas$LSOA11CD<- NULL
-msoas$LSOA11NM<- NULL
+msoas$LSOA11CD <- NULL
+msoas$LSOA11NM <- NULL
 colnames(msoas) <- c("oa","msoa")
-msoas <-  msoas[which( england_OAs@data$CODE %in% msoas$oa ),] # Filter msoas based on msoas for which we have geometries
+# Filter msoas based on msoas for which we have geometries
+msoas <- msoas[which(england_OAs@data$CODE %in% msoas$oa ),]
 candidate_msoas <- msoas %>% select(msoa) %>% distinct(msoa)
 colnames(candidate_msoas) <- c("msoa")
 ```
@@ -76,23 +77,23 @@ The two summary statistics we explored are Coefficient of Variation in area and 
 
 ```r
 # Function for exploring study regions of varying geography
-find.geography <- function(england_msoas, msoas, england_OAs, coefVarMin, coefVarMax, nniMin, nniMax, coefVar)
+find.geography <- function(england_msoas, msoas, england_OAs, coef_var_min, coef_var_max, nni_min, nni_max, calculate_coef_var)
 {
   repeat
   {
     sample_msoa <- england_msoas[sample(england_msoas@data$row, 1),]
     sample_msoas <- england_msoas@data[get.knnx(coordinates(england_msoas),coordinates(sample_msoa), k=2)$nn.index,]
-    sample_OAs<- msoas[which( msoas$msoa %in% sample_msoas$msoa ),]
+    sample_OAs <- msoas[which( msoas$msoa %in% sample_msoas$msoa ),]
     if(nrow(sample_OAs)>0)
     {
-      sample_geoms <- england_OAs[england_OAs@data$CODE %in%  sample_OAs$oa,]
-      centroids<- gCentroid(sample_geoms, byid=TRUE)
+      sample_geom <- england_OAs[england_OAs@data$CODE %in%  sample_OAs$oa,]
+      centroids <- gCentroid(sample_geoms, byid=TRUE)
       nni<- mean(nndist(centroids@coords))/(0.5*sqrt(gArea(sample_geoms, byid=FALSE)/length(sample_geoms@data$row)))
-    coef_var<- sd(gArea(sample_geoms, byid=TRUE)/1000/1000)/mean(gArea(sample_geoms, byid=TRUE)/1000/1000)
+      coef_var <- sd(gArea(sample_geoms, byid=TRUE)/1000/1000)/mean(gArea(sample_geoms, byid=TRUE)/1000/1000)
 
-      if(coefVar)
+      if(calculate_coef_var)
       {
-          if(coef_var>coefVarMin && coef_var<coefVarMax && length(sample_geoms) > 44 && length(sample_geoms) < 56 )
+          if(coef_var > coef_var_min && coef_var < coef_var_max && length(sample_geoms) > 44 && length(sample_geoms) < 56 )
           {
             sample_geoms@data$row<-1:length(sample_geoms)
             return(sample_geoms)
@@ -101,12 +102,12 @@ find.geography <- function(england_msoas, msoas, england_OAs, coefVarMin, coefVa
       }
       else
       {
-        if(nni > nniMin && nni < nniMax && length(sample_geoms) > 44 && length(sample_geoms) < 56 )
-          {
+        if(nni > nni_min && nni < nni_max && length(sample_geoms) > 44 && length(sample_geoms) < 56 )
+        {
             sample_geoms@data$row<-1:length(sample_geoms)
             return(sample_geoms)
             break
-          }
+        }
       }
     }
   }
@@ -130,18 +131,16 @@ We first define a function for generating synthetic attribute data: rectangular 
 ```r
 create.attribute.data <- function(data)
 {
-  data@data$value<- NULL
+  data@data$value <- NULL
   nrows <- nrow(data@data)
-  temp<-  data.frame(matrix(ncol = 2, nrow = nrows))
-  temp[,1]<- 1:nrows
-
-  #uniform distribution
-  dist<-runif(nrows, min=1, max=10)
-  temp[,2]<- dist
-  colnames(temp)<- c("index","value")
-  temp[,1]<- data@data$CODE
-  colnames(temp)<- c("CODE","value")
-  data@data<-merge(data@data, temp, by="CODE")
+  temp <- data.frame(matrix(ncol = 2, nrow = nrows))
+  temp[,1] <- 1:nrows
+  dist <- runif(nrows, min=1, max=10)
+  temp[,2] <- dist
+  colnames(temp) <- c("index","value")
+  temp[,1] <- data@data$CODE
+  colnames(temp) <- c("CODE","value")
+  data@data <- merge(data@data, temp, by="CODE")
   return(data)
 }
 ```
@@ -150,57 +149,57 @@ Next we develop a function for creating maps with a stated [Moran's _I_](http://
 ```r
 generate.map <- function(data, min, max)
 {
-  data.nb <- poly2nb(data)
-  data.dsts <- nbdists(data.nb, coordinates(data))
-  idw <- lapply(data.dsts, function(x) 1/x)
-  data.lw <- nb2listw(data.nb, glist = idw)
+  data_nb <- poly2nb(data)
+  data_dsts <- nbdists(data_nb, coordinates(data))
+  idw <- lapply(data_dsts, function(x) 1/x)
+  data_lw <- nb2listw(data_nb, glist = idw)
 
   repeat
   {
     # Start with a new permutation
-    permutation<- data@data[sample(nrow(data@data)),]
-    iNow <- moran.test(permutation$value, data.lw)$estimate[1]
-    iOld<- iNow
-    dOld<-NULL
-    dOld=sqrt((iNow-max)^2)
+    permutation <- data@data[sample(nrow(data@data)),]
+    i_now <- moran.test(permutation$value, data_lw)$estimate[1]
+    i_old <- i_now
+    d_old <-NULL
+    d_old <- sqrt((i_now-max)^2)
 
     # If after 5000 attempts, still not reached desired Moran's I, then try a new permutation.
     for(j in 1:5000)
     {
       # Break if reached desired I.
-      if(iNow >=min && iNow < max)
+      if(i_now >= min && i_now < max)
       {
         break
       }  
 
       # Sample two distinct positions  
-      swapIndex <- sample(1:nrow(permutation),2, replace=FALSE)
-      #get values corresponding to these positions
-      swapValues <- sapply(swapIndex,function(rowIndex){return(permutation$value[rowIndex])})
+      swap_index <- sample(1:nrow(permutation),2, replace=FALSE)
+      # Get values corresponding to these positions
+      swapValues <- sapply(swap_index,function(row_index){return(permutation$value[row_index])})
 
       # Swap the values
-      permutation$value[swapIndex[1]]<-swapValues[2]
-      permutation$value[swapIndex[2]]<-swapValues[1]
+      permutation$value[swap_index[1]]<-swap_values[2]
+      permutation$value[swap_index[2]]<-swap_values[1]
 
       # Calculate new Moran's I  
-      iNow <- moran.test(permutation$value, data.lw)$estimate[1]
-      dNow=sqrt((iNow-max)^2)
+      i_now <- moran.test(permutation$value, data.lw)$estimate[1]
+      d_now=sqrt((i_now-max)^2)
 
       # Revert back if it's not reduced distance to targets
-      if(dNow<dOld)
+      if(d_now<d_old)
       {
-        iOld <- iNow
-        dOld <- dNow
+        i_old <- i_now
+        d_now <- dNow
       }
       else # Revert if no nearer target
       {  
-        iNow<-iOld
+        i_now<-i_old
         permutation$value[swapIndex[1]]<-swapValues[1]
         permutation$value[swapIndex[2]]<-swapValues[2]
       }
     }
     #break if reached desired I.
-    if(iNow > min && iNow <=max)
+    if(i_now > min && i_now <=max)
     {
       break
     }  
@@ -209,9 +208,8 @@ generate.map <- function(data, min, max)
   data@data <- cbind(data@data,permutation$value);
   colnames(data@data)[4] <- "permutation"
 
-
   # Draw maps
-  map<- tm_shape(data) +
+  map <- tm_shape(data) +
     tm_fill(c("permutation"),style="cont", palette="YlOrBr")+
     tm_borders(col="gray80", lwd=1)+
     tm_layout(legend.show=FALSE,frame=FALSE)
@@ -221,20 +219,20 @@ generate.map <- function(data, min, max)
 ```
 
 ```r
-regular<- create.attribute.data(regular)
-map1<- generate.map(regular, 0.9,0.91)
-map2<- generate.map(regular, 0.7,0.71)
-map3<- generate.map(regular, 0.5,0.51)
-map4<- generate.map(regular, 0.3,0.31)
-map5<- generate.map(regular, 0.1,0.11)
+regular <- create.attribute.data(regular)
+map1 <- generate.map(regular, 0.9,0.91)
+map2 <- generate.map(regular, 0.7,0.71)
+map3 <- generate.map(regular, 0.5,0.51)
+map4 <- generate.map(regular, 0.3,0.31)
+map5 <- generate.map(regular, 0.1,0.11)
 library(grid)
 grid.newpage()
 pushViewport(viewport(layout=grid.layout(1,5)))
-print(map1, vp=viewport(layout.pos.col = 1))
-print(map2, vp=viewport(layout.pos.col = 2))
-print(map3, vp=viewport(layout.pos.col = 3))
-print(map4, vp=viewport(layout.pos.col = 4))
-print(map5, vp=viewport(layout.pos.col = 5))
+print(map1, vp=viewport(layout.pos.col=1))
+print(map2, vp=viewport(layout.pos.col=2))
+print(map3, vp=viewport(layout.pos.col=3))
+print(map4, vp=viewport(layout.pos.col=4))
+print(map5, vp=viewport(layout.pos.col=5))
 ```
 ![plot of chunk generating_geographies](figures/autocorrelated_maps.png)
 
@@ -254,7 +252,6 @@ library(magrittr)
 library(dplyr)
 library(ggplot2)
 library(RColorBrewer)
-
 # Data
 data <- read.csv("data/data.csv", header = TRUE)
 ```
@@ -294,9 +291,9 @@ Harrison _et al._ discuss the problem of outliers and use a threshold of 3 absol
 ``` r
 # Calculate chance by running the simulate_chance.R script
 source("src/simulate_chance.R")
-data<-merge(data, chance_by_condition)
+data <- merge(data, chance_by_condition)
 colnames(chance_by_condition)<- c("base","approach","chance_jnd")
-data<-merge(data, chance_by_condition)
+data <- merge(data, chance_by_condition)
 data <- data %>% mutate(is_chance = jnd>chance_jnd)
 ```
 
@@ -343,8 +340,6 @@ cohen.d(cohens_data[cohens_data$geography=="1_grid",]$jnd, cohens_data[cohens_da
 
 cohen.d(cohens_data[cohens_data$geography=="2_reg",]$jnd, cohens_data[cohens_data$geography=="3_irreg" ,]$jnd)
 
-# Cohen's d
-
 ## d estimate: -0.4094879 (small)
 ## 95 percent confidence interval:
 ##       inf        sup
@@ -356,13 +351,13 @@ Following Kay & Heer, we compare linear models with and without log transformati
 
 ``` r
 library(gamlss)
-m.linear.reg = gamlss(jnd ~ base,data=data_model%>% filter(geography=="2_reg", accuracy>0.55)
+m_linear_reg = gamlss(jnd ~ base,data=data_model%>% filter(geography=="2_reg", accuracy>0.55)
 
-m.loglinear.reg = gamlss(jnd ~ base, data=data_model %>% filter(geography=="2_reg", accuracy>0.55), family=LOGNO)
+m_loglinear_reg = gamlss(jnd ~ base, data=data_model %>% filter(geography=="2_reg", accuracy>0.55), family=LOGNO)
 
 # This uses the plotting function provided by Kay & Heer.
-plot_model_residuals(m.linear.reg)
-plot_model_residuals(m.loglinear.reg)
+plot.model.residuals(m_linear_reg)
+plot.model.residuals(m_loglinear_reg)
 ```
 
 ![plot of chunk residuals_linear_vs_log](figures/residuals_linear_vs_log.png)
@@ -371,12 +366,11 @@ Kay & Heer also identify the problem of participant effects. Each participant co
 
 ```
 library(lme4)
-m.grid <- lmer(log(jnd) ~ base + (1|user_id), data=data_model %>% filter(geography=="1_grid", accuracy>0.55))
-m.reg <- lmer(log(jnd) ~ base + (1|user_id), data=data_model %>% filter(geography=="2_reg", accuracy>0.55))
-m.irreg <- lmer(log(jnd) ~ base + (1|user_id), data=data_model %>% filter(geography=="3_irreg", accuracy>0.55))
+m_grid <- lmer(log(jnd) ~ base + (1|user_id), data=data_model %>% filter(geography=="1_grid", accuracy>0.55))
+m_reg <- lmer(log(jnd) ~ base + (1|user_id), data=data_model %>% filter(geography=="2_reg", accuracy>0.55))
+m_irreg <- lmer(log(jnd) ~ base + (1|user_id), data=data_model %>% filter(geography=="3_irreg", accuracy>0.55))
 library(MuMIn) # for pseudo-rsquared
-r.squaredGLMM(m.reg)
-
+r.squaredGLMM(m_reg)
 ```
 
 We evaluate the models using estimated regression coefficients, model fits and prediction intervals. Note that direct comparisons between _regular grid_ and the _real_ geographies should be treated cautiously since we do not have data at bases of 0.2 and 0.9 for the _regular grid_ case.
