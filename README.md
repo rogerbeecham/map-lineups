@@ -69,7 +69,7 @@ find.geography <- function(england_msoas, msoas, england_OAs, coef_var_min, coef
     sample_OAs <- msoas[which( msoas$msoa %in% sample_msoas$msoa ),]
     if(nrow(sample_OAs)>0)
     {
-      sample_geom <- england_OAs[england_OAs@data$CODE %in%  sample_OAs$oa,]
+      sample_geoms <- england_OAs[england_OAs@data$CODE %in%  sample_OAs$oa,]
       centroids <- gCentroid(sample_geoms, byid=TRUE)
       nni<- mean(nndist(centroids@coords))/(0.5*sqrt(gArea(sample_geoms, byid=FALSE)/length(sample_geoms@data$row)))
       coef_var <- sd(gArea(sample_geoms, byid=TRUE)/1000/1000)/mean(gArea(sample_geoms, byid=TRUE)/1000/1000)
@@ -154,24 +154,24 @@ generate.map <- function(data, min, max)
       # Sample two distinct positions  
       swap_index <- sample(1:nrow(permutation),2, replace=FALSE)
       # Get values corresponding to these positions
-      swapValues <- sapply(swap_index,function(row_index){return(permutation$value[row_index])})
+      swap_values <- sapply(swap_index,function(row_index){return(permutation$value[row_index])})
       # Swap the values
       permutation$value[swap_index[1]]<-swap_values[2]
       permutation$value[swap_index[2]]<-swap_values[1]
       # Calculate new Moran's I  
-      i_now <- moran.test(permutation$value, data.lw)$estimate[1]
+      i_now <- moran.test(permutation$value, data_lw)$estimate[1]
       d_now=sqrt((i_now-max)^2)
       # Revert back if it's not reduced distance to targets
-      if(d_now<d_old)
+      if(d_now < d_old)
       {
-        i_old <- i_now
-        d_now <- dNow
+       i_old <- i_now
+       d_old <- d_now
       }
       else # Revert if no nearer target
       {  
         i_now<-i_old
-        permutation$value[swapIndex[1]]<-swapValues[1]
-        permutation$value[swapIndex[2]]<-swapValues[2]
+        permutation$value[swap_index[1]]<-swap_values[1]
+        permutation$value[swap_index[2]]<-swap_values[2]
       }
     }
     #break if reached desired I.
