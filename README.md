@@ -1,7 +1,7 @@
 
 # Supplementary details for _Map LineUps: effects of spatial structure on graphical inference_
 
-_Roger Beecham_ (contact [roger.beecham@city.ac.uk](mailto:roger.beecham@city.ac.uk)) <br>
+_Roger Beecham_ (contact [r.j.beecham@leeds.ac.uk](mailto:r.j.beecham@leeds.ac.uk)) <br>
 _Jason Dykes_ <br>
 _Wouter Meulemans_ <br>
 _Aidan Slingsby_ <br>
@@ -215,7 +215,7 @@ R scripts for generating maps in the directory structure used by our survey soft
 
 You will need to install [_MySQL_](https://dev.mysql.com/usingmysql/get_started.html) and  [_MAMP_](https://www.mamp.info/en/) -- the latter of which  enables _PHP_ and _MySQL_ to be run locally. After installing _MAMP_, select ```preferences```, ```web server``` and navigate to ```../experiment/```. After ```start servers```, open a browser and enter ```localhost:8888/admin_initialize.php```. As well as creating the _MySQL_ dbase (called _maplineups_) and required tables, this reads the pushed sample maps stored as .png files in [tests/](experiment/tests/) and creates a ```../stimuli/``` folder, which is used by the dbase and survey software. To reduce the size of this repository regular grids only have been uploaded. Open a _MySQL_ dbase connection via ```root``` and use the recently created  maplineups dbase. This should contain five tables: _lineup_, _lineupanswer_, _map_, _participantgroup_, _user_.  To try the survey enter into a browser: ```localhost:8888```.
 
-Do get in touch if you encounter any problems following these (rather terse) instructions: [roger.beecham@city.ac.uk](mailto:roger.beecham@city.ac.uk).
+Do get in touch if you encounter any problems following these (rather terse) instructions: [r.j.beecham@leeds.ac.uk](mailto:r.j.beecham@leeds.ac.uk).
 
 ## Analysis
 
